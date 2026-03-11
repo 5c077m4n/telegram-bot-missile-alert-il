@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"telegram-bot-missile-alert-il/alerts"
+	"telegram-bot-missile-alert-il/cities"
 	"telegram-bot-missile-alert-il/handler"
 
 	"github.com/go-telegram/bot"
@@ -30,6 +31,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Failed to create bot: %v\n", err)
 		os.Exit(1)
 	}
+	allCities, _ := cities.FetchCities()
+	slog.Info(
+		"Got all cities",
+		"count", len(allCities),
+	)
 	go alerts.PollAlerts(ctx, b)
 
 	slog.Info("Telegram bot is starting...")
