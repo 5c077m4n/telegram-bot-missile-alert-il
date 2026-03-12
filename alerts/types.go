@@ -20,8 +20,8 @@ var AlertTypeNames = map[int]string{
 }
 
 type WarningAlert struct {
-	ID          int64    `json:"id"`
-	Category    int      `json:"cat"`
+	ID          int64    `json:"id,string"`
+	Category    int      `json:"cat,string"`
 	Title       string   `json:"title"`
 	Cities      []string `json:"data"`
 	Description string   `json:"desc"`

@@ -123,7 +123,11 @@ func PollAlerts(ctx context.Context, b *bot.Bot) {
 				continue
 			}
 
-			if alert.ID != 0 && !isDuplicateAlert(alert.ID) {
+			slog.Info(
+				"Recieved alert",
+				"value", alert,
+			)
+			if !isDuplicateAlert(alert.ID) {
 				if err := notifyUsers(ctx, b, alert); err != nil {
 					slog.Error(
 						"could not notify user",
