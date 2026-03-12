@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"telegram-bot-missile-alert-il/users"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
-func HandleMessage(
+func HandleCityChange(
 	ctx context.Context,
 	b *bot.Bot,
 	update *models.Update,
@@ -23,64 +24,37 @@ func HandleMessage(
 	}
 
 	chatID := update.Message.Chat.ID
-	text := update.Message.Text
-	slog.Info(
-		"Recieved message",
-		"chat ID", chatID,
-		"message", text,
-	)
+	newCity := strings.TrimLeft(update.Message.Text, "/city ")
+	slog.Info("Recieved message", "chat ID", chatID, "new city", newCity)
 
-	if !slices.Contains(availableCities, text) {
+	if !slices.Contains(availableCities, newCity) {
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatID,
-			Text:   text + "\nis a stupid city, please choose a better one",
+			Text:   newCity + "\nis a stupid city, please choose a better one",
 		})
 		if err != nil {
-			slog.Error(
-				"Error sending re-choose city message",
-				"chat ID", chatID,
-				"error", err,
-			)
+			slog.Error("Error sending re-choose city message", "chat ID", chatID, "error", err)
 		}
 		return
 	}
 
 	user := users.GetUser(chatID)
-
-	if user.City == "" {
-		user.City = text
-		if err := users.UpdateUserCity(chatID, user.City); err != nil {
-			slog.Error(
-				"Error updating user city",
-				"chat ID", chatID,
-				"error", err,
-			)
-			return
-		}
-
-		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+	user, err := users.UpdateUserCity(user.ChatID, newCity)
+	if err != nil {
+		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatID,
-			Text:   "You are now subscribed to alerts for: " + user.City,
+			Text:   "My bad, couldn't update your city",
 		})
-		if err != nil {
-			slog.Error(
-				"Error sending subscription successful message",
-				"chat ID", chatID,
-				"error", err,
-			)
-		}
-	} else {
-		_, err := b.SendMessage(
-			ctx,
-			&bot.SendMessageParams{ChatID: chatID, Text: "Updated your city to: " + user.City},
-		)
-		if err != nil {
-			slog.Error(
-				"Error sending city update message",
-				"chat ID", chatID,
-				"error", err,
-			)
-		}
-
+		slog.Error("Could not find user", "chatID", user.ChatID)
+		return
 	}
+
+	_, err = b.SendMessage(
+		ctx,
+		&bot.SendMessageParams{ChatID: chatID, Text: "Updated your city to: " + user.City},
+	)
+	if err != nil {
+		slog.Error("Error sending city update message", "chat ID", chatID, "error", err)
+	}
+
 }

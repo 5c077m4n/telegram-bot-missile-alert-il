@@ -19,12 +19,15 @@ func GetUser(chatID int64) *User {
 	return user
 }
 
-func UpdateUserCity(chatID int64, city string) error {
+func UpdateUserCity(chatID int64, city string) (*User, error) {
 	if user, ok := usersMap.Load(chatID); ok {
-		user.(*User).City = city
-		return nil
+		user := user.(*User)
+
+		user.City = city
+		user.UpdatedAt = time.Now()
+		return user, nil
 	}
-	return ErrUserNotFound
+	return nil, ErrUserNotFound
 }
 
 func GetAllUsers() []*User {

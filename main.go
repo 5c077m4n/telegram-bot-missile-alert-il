@@ -33,16 +33,20 @@ func main() {
 		"count", len(allCities),
 	)
 
-	opts := []bot.Option{
-		bot.WithDefaultHandler(func(ctx context.Context, bot *bot.Bot, update *models.Update) {
-			handler.HandleMessage(ctx, bot, update, allCities)
-		}),
-	}
-	b, err := bot.New(token, opts...)
+	b, err := bot.New(token)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create bot: %v\n", err)
 		os.Exit(1)
 	}
+	b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/city",
+		bot.MatchTypePrefix,
+		func(ctx context.Context, bot *bot.Bot, update *models.Update) {
+			handler.HandleCityChange(ctx, bot, update, allCities)
+		},
+	)
+
 	allHistory, _ := history.FetchHistory()
 	slog.Info(
 		"Got entire history",
