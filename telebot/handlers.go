@@ -26,7 +26,7 @@ Type /city to choose your city 😎`,
 	}
 }
 
-func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update) {
+func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, store *users.Store) {
 	if update.Message == nil {
 		return
 	}
@@ -64,8 +64,17 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update) {
 		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
 	}
 
-	user := users.GetUser(chatID)
-	user, err := users.UpdateUserCity(user.ChatID, newCity)
+	user, err := store.GetUser(chatID)
+	if err != nil {
+		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "My bad, couldn't get your user",
+		})
+		slog.Error("Could not get user", "chatID", chatID, "error", err)
+		return
+	}
+
+	user, err = store.UpdateUserCity(user.ChatID, newCity)
 	if err != nil {
 		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatID,

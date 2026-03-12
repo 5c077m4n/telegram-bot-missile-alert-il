@@ -40,8 +40,12 @@ func formatAlertMessage(alert *WarningAlert) string {
 	return strings.Join(messageParts, "\n\n")
 }
 
-func notifyUsers(ctx context.Context, b *bot.Bot, alert *WarningAlert) error {
-	allUsers := users.GetAllUsers()
+func notifyUsers(ctx context.Context, b *bot.Bot, store *users.Store, alert *WarningAlert) error {
+	allUsers, err := store.GetAllUsers(ctx)
+	if err != nil {
+		slog.Error("Could not get all users", "error", err)
+		return err
+	}
 
 	var errs []error
 	for _, user := range allUsers {
@@ -109,7 +113,7 @@ func fetchAlert() (*WarningAlert, error) {
 	return alert, nil
 }
 
-func PollAlerts(ctx context.Context, b *bot.Bot) {
+func PollAlerts(ctx context.Context, b *bot.Bot, store *users.Store) {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
@@ -128,7 +132,7 @@ func PollAlerts(ctx context.Context, b *bot.Bot) {
 				"value", alert,
 			)
 			if !isDuplicateAlert(alert.ID) {
-				if err := notifyUsers(ctx, b, alert); err != nil {
+				if err := notifyUsers(ctx, b, store, alert); err != nil {
 					slog.Error(
 						"could not notify user",
 						"error", err,
