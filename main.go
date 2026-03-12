@@ -13,6 +13,7 @@ import (
 	"telegram-bot-missile-alert-il/history"
 
 	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -26,17 +27,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	opts := []bot.Option{bot.WithDefaultHandler(handler.HandleMessage)}
+	allCities, _ := cities.FetchAllCityNames()
+	slog.Info(
+		"Got all cities",
+		"count", len(allCities),
+	)
+
+	opts := []bot.Option{
+		bot.WithDefaultHandler(func(ctx context.Context, bot *bot.Bot, update *models.Update) {
+			handler.HandleMessage(ctx, bot, update, allCities)
+		}),
+	}
 	b, err := bot.New(token, opts...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create bot: %v\n", err)
 		os.Exit(1)
 	}
-	allCities, _ := cities.FetchCities()
-	slog.Info(
-		"Got all cities",
-		"count", len(allCities),
-	)
 	allHistory, _ := history.FetchHistory()
 	slog.Info(
 		"Got entire history",

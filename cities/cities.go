@@ -49,3 +49,17 @@ func FetchCities() ([]CityData, error) {
 
 	return cities, nil
 }
+
+func FetchAllCityNames() ([]string, error) {
+	allCities, err := FetchCities()
+	if err != nil {
+		return nil, err
+	}
+
+	cityNames := make([]string, len(allCities))
+	for _, city := range allCities {
+		cityNames = append(cityNames, city.Label)
+	}
+
+	return cityNames, nil
+}
