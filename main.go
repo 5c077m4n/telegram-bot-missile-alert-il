@@ -10,6 +10,7 @@ import (
 	"telegram-bot-missile-alert-il/alerts"
 	"telegram-bot-missile-alert-il/cities"
 	"telegram-bot-missile-alert-il/handler"
+	"telegram-bot-missile-alert-il/history"
 
 	"github.com/go-telegram/bot"
 	_ "github.com/joho/godotenv/autoload"
@@ -35,6 +36,11 @@ func main() {
 	slog.Info(
 		"Got all cities",
 		"count", len(allCities),
+	)
+	allHistory, _ := history.FetchHistory()
+	slog.Info(
+		"Got entire history",
+		"count", len(allHistory),
 	)
 	go alerts.PollAlerts(ctx, b)
 
