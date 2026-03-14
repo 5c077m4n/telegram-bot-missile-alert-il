@@ -31,3 +31,10 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Ignore OpenTofu/Terraform CLI configuration files
+.terraform/
+.terraformrc
+terraform.rc
+*.tfstate
+*.tfstate.*
