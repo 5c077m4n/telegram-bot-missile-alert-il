@@ -5,13 +5,13 @@ import (
 	"log/slog"
 	"os"
 	"telegram-bot-missile-alert-il/alerts"
-	"telegram-bot-missile-alert-il/users"
+	"telegram-bot-missile-alert-il/store"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
 
-func Setup(ctx context.Context, s *users.Store) error {
+func Setup(ctx context.Context, s *store.Store) error {
 	token, found := os.LookupEnv("TELEGRAM_BOT_API_TOKEN")
 	if !found {
 		return ErrTokenNotFound

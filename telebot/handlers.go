@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"telegram-bot-missile-alert-il/cities"
-	"telegram-bot-missile-alert-il/users"
+	"telegram-bot-missile-alert-il/store"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -26,7 +26,7 @@ Type /city to choose your city 😎`,
 	}
 }
 
-func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, store *users.Store) {
+func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, store *store.Store) {
 	if update.Message == nil {
 		return
 	}
@@ -47,7 +47,10 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, st
 		return
 	}
 
-	if availableCities, err := cities.FetchAllCityNames(); err == nil {
+	availableCities, err := cities.FetchAllCityNames()
+	if err != nil {
+		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
+	} else {
 		slog.Info("Got all cities", "count", len(availableCities))
 
 		if !slices.Contains(availableCities, newCity) {
@@ -60,8 +63,6 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, st
 			}
 			return
 		}
-	} else {
-		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
 	}
 
 	user, err := store.GetUser(chatID)

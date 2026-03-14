@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/signal"
 
+	"telegram-bot-missile-alert-il/store"
 	"telegram-bot-missile-alert-il/telebot"
-	"telegram-bot-missile-alert-il/users"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -18,7 +18,7 @@ func main() {
 	uri := os.Getenv("MONGO_URI")
 	dbName := os.Getenv("MONGO_DB")
 
-	store, err := users.NewStore(uri, dbName)
+	store, err := store.NewStore(uri, dbName)
 	if err != nil {
 		panic(err)
 	}

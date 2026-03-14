@@ -11,7 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"telegram-bot-missile-alert-il/users"
+	"telegram-bot-missile-alert-il/cities"
+	"telegram-bot-missile-alert-il/store"
 
 	"github.com/go-telegram/bot"
 )
@@ -40,8 +41,8 @@ func formatAlertMessage(alert *WarningAlert) string {
 	return strings.Join(messageParts, "\n\n")
 }
 
-func notifyUsers(ctx context.Context, b *bot.Bot, store *users.Store, alert *WarningAlert) error {
-	allUsers, err := store.GetAllUsers(ctx)
+func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, alert *WarningAlert) error {
+	allUsers, err := s.GetAllUsers(ctx)
 	if err != nil {
 		slog.Error("Could not get all users", "error", err)
 		return err
@@ -53,7 +54,7 @@ func notifyUsers(ctx context.Context, b *bot.Bot, store *users.Store, alert *War
 			continue
 		}
 
-		if users.ContainsCityArray(alert.Cities, user.City) {
+		if cities.ContainsCityArray(alert.Cities, user.City) {
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: user.ChatID,
 				Text:   formatAlertMessage(alert),
@@ -113,7 +114,7 @@ func fetchAlert() (*WarningAlert, error) {
 	return alert, nil
 }
 
-func PollAlerts(ctx context.Context, b *bot.Bot, store *users.Store) {
+func PollAlerts(ctx context.Context, b *bot.Bot, s *store.Store) {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
@@ -132,7 +133,7 @@ func PollAlerts(ctx context.Context, b *bot.Bot, store *users.Store) {
 				"value", alert,
 			)
 			if !isDuplicateAlert(alert.ID) {
-				if err := notifyUsers(ctx, b, store, alert); err != nil {
+				if err := notifyUsers(ctx, b, s, alert); err != nil {
 					slog.Error(
 						"could not notify user",
 						"error", err,
