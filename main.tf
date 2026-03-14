@@ -117,14 +117,11 @@ resource "google_compute_instance" "vm_instance" {
     git clone https://github.com/5c077m4n/telegram-bot-missile-alert-il.git
     cd telegram-bot-missile-alert-il/
 
-    cat >.env <<-END
-    ENV=prod
-    TELEGRAM_BOT_API_TOKEN="$(gcloud secrets versions access latest --secret="TELEGRAM_BOT_API_TOKEN")"
-    MONGO_URI="$(gcloud secrets versions access latest --secret="MONGO_URI")"
-    MONGO_DB="$(gcloud secrets versions access latest --secret="MONGO_DB")"
-    END
-    sudo docker compose up -d --build
+    echo "ENV=prod" >>.env
+    echo "TELEGRAM_BOT_API_TOKEN=$(gcloud secrets versions access latest --secret="TELEGRAM_BOT_API_TOKEN")" >>.env
+    echo "MONGO_URI=$(gcloud secrets versions access latest --secret="MONGO_URI")" >>.env
+    echo "MONGO_DB=$(gcloud secrets versions access latest --secret="MONGO_DB")" >>.env
 
-    set +x
+    sudo docker compose --profile prod up -d --build
   EOT
 }
