@@ -83,6 +83,8 @@ resource "google_compute_instance" "vm_instance" {
   machine_type = "e2-medium"
   zone         = "${var.REGION}-c"
 
+  tags = ["telegram-bot"]
+
   boot_disk {
     initialize_params { image = "ubuntu-2404-lts-amd64" }
   }
@@ -124,4 +126,26 @@ resource "google_compute_instance" "vm_instance" {
 
     sudo docker compose --profile prod up -d --build
   EOT
+}
+
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = google_compute_instance.vm_instance.network_interface[0].network
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = google_compute_instance.vm_instance.tags
+}
+resource "google_compute_firewall" "deny_all" {
+  name      = "deny-all-ingress"
+  network   = google_compute_instance.vm_instance.network_interface[0].network
+  priority  = 65534
+  direction = "INGRESS"
+
+  deny { protocol = "all" }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = google_compute_instance.vm_instance.tags
 }
