@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
 func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -54,12 +55,16 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, st
 		slog.Info("Got all cities", "count", len(availableCities))
 
 		if !slices.Contains(availableCities, newCity) {
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: chatID,
-				Text:   newCity + "\nis a stupid city, please choose a better one",
-			})
-			if err != nil {
-				slog.Error("Error sending re-choose city message", "chat ID", chatID, "error", err)
+			msg := strings.Builder{}
+			msg.WriteString(newCity + "\nis a stupid city, please choose a better one")
+
+			if similars := fuzzy.Find(newCity, availableCities); len(similars) > 0 {
+				msg.WriteString("\nMaybe you meant:\n")
+				msg.WriteString(strings.Join(similars, "\n"))
+			}
+
+			if _, err := b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: msg.String()}); err != nil {
+				slog.Error("Error sending re-choose city message", "chat ID", chatID, "error", err, "message", msg)
 			}
 			return
 		}

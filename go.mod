@@ -5,6 +5,7 @@ go 1.26.1
 require (
 	github.com/go-telegram/bot v1.19.0
 	github.com/joho/godotenv v1.5.1
+	github.com/lithammer/fuzzysearch v1.1.8
 	go.mongodb.org/mongo-driver v1.17.1
 )
 
