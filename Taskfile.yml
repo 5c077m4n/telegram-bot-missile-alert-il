@@ -1,5 +1,8 @@
 version: "3"
 
+dotenv:
+  - .env
+
 tasks:
   run:
     cmds:
@@ -27,3 +30,27 @@ tasks:
   watch:
     cmds:
       - air
+  deploy:
+    env:
+      TF_VAR_PROJECT_ID: "{{.PROJECT_ID}}"
+      TF_VAR_TELEGRAM_BOT_API_TOKEN: "{{.TELEGRAM_BOT_API_TOKEN}}"
+      TF_VAR_MONGO_URI: "{{.MONGO_URI}}"
+      TF_VAR_MONGO_DB: "{{.MONGO_DB}}"
+    cmds:
+      - tofu apply
+  ssh:
+    cmds:
+      - export VM_VALUES="$(tofu show -json | jq --raw-output '.values.root_module.resources[] | select(.name == "vm_instance") | .values')"
+        export NAME="$(echo "$VM_VALUES" | jq --raw-output '.name')" &&
+        export ZONE="$(echo "$VM_VALUES" | jq --raw-output '.zone')" &&
+        gcloud compute ssh --zone "$ZONE" "$NAME" --project $PROJECT_ID {{.EXTRA_ARGS}}
+  ssh:deploy:
+    cmds:
+      - task: ssh
+        vars:
+          EXTRA_ARGS: --command 'cd ~/workspace/telegram-bot-missile-alert-il/ && git pull --rebase && task compose'
+  ssh:logs:
+    cmds:
+      - task: ssh
+        vars:
+          EXTRA_ARGS: --command 'sudo docker logs --follow telegram-bot-missile-alert-il-app-1'
