@@ -35,6 +35,19 @@ func (s *Store) GetUser(chatID int64) (*User, error) {
 	var user User
 	err := s.usersCollection.FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&user)
 	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, ErrUserNotFound
+	}
+
+	return &user, err
+}
+
+func (s *Store) GetOrCreateUser(chatID int64) (*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var user User
+	err := s.usersCollection.FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&user)
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		user := &User{ChatID: chatID, CreatedAt: time.Now(), UpdatedAt: time.Now()}
 		_, err := s.usersCollection.InsertOne(ctx, user)
 		if err != nil {

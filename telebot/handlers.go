@@ -46,13 +46,13 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 		return
 	}
 
-	availableCities, err := cities.FetchAllCityNamesOnce()
-	if err != nil {
+	if availableCities, err := cities.FetchAllCityNamesOnce(); err != nil {
 		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
 	} else {
 		if !slices.Contains(availableCities, newCity) {
 			msg := strings.Builder{}
-			msg.WriteString(newCity + "\nis a stupid city, please choose a better one")
+			msg.WriteString(newCity)
+			msg.WriteString("\nis a stupid city, please choose a better one")
 
 			if similars := fuzzy.Find(newCity, availableCities); len(similars) > 0 {
 				msg.WriteString("\nMaybe you meant:\n")
@@ -66,7 +66,7 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 		}
 	}
 
-	user, err := s.GetUser(chatID)
+	user, err := s.GetOrCreateUser(chatID)
 	if err != nil {
 		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatID,
@@ -106,7 +106,7 @@ func handleWhere(ctx context.Context, b *bot.Bot, update *models.Update, s *stor
 	if err != nil {
 		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatID,
-			Text:   "My bad, couldn't get your user",
+			Text:   "My bad, couldn't get your user. Did you choose a city yet?",
 		})
 		slog.Error("Could not get user", "chatID", chatID, "error", err)
 		return
