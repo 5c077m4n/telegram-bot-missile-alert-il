@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"telegram-bot-missile-alert-il/alerts"
+	"telegram-bot-missile-alert-il/history"
 	"telegram-bot-missile-alert-il/store"
 
 	"github.com/go-telegram/bot"
@@ -36,7 +37,8 @@ func Setup(ctx context.Context, s *store.Store) error {
 		},
 	)
 
-	go alerts.PollAlerts(ctx, b, s)
+	go alerts.Poll(ctx, b, s)
+	go history.Poll(ctx, b, s)
 
 	slog.Info("Telegram bot is starting...")
 	b.Start(ctx)

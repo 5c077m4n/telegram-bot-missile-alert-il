@@ -114,7 +114,7 @@ func fetchAlert() (*WarningAlert, error) {
 	return alert, nil
 }
 
-func PollAlerts(ctx context.Context, b *bot.Bot, s *store.Store) {
+func Poll(ctx context.Context, b *bot.Bot, s *store.Store) {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 

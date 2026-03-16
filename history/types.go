@@ -25,6 +25,6 @@ func (hDate *HistoryItemDate) UnmarshalJSON(bytes []byte) error {
 type HistoryItem struct {
 	Date     HistoryItemDate `json:"alertDate"`
 	Title    string          `json:"title"`
-	Data     string          `json:"data"`
+	City     string          `json:"data"`
 	Category int             `json:"category"`
 }

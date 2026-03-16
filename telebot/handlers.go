@@ -16,10 +16,8 @@ import (
 
 func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text: `*Welcome\!*
-
-Type /city to choose your city 😎`,
+		ChatID:    update.Message.Chat.ID,
+		Text:      `*Welcome\!* Type /city to choose your city 😎`,
 		ParseMode: models.ParseModeMarkdown,
 	})
 	if err != nil {
