@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -50,11 +51,12 @@ func FetchCities() ([]CityData, error) {
 	return cities, nil
 }
 
-func FetchAllCityNames() ([]string, error) {
+var FetchAllCityNamesOnce = sync.OnceValues(func() ([]string, error) {
 	allCities, err := FetchCities()
 	if err != nil {
 		return nil, err
 	}
+	slog.Info("Fetched all cities", "count", len(allCities))
 
 	cityNames := make([]string, len(allCities))
 	for _, city := range allCities {
@@ -62,4 +64,4 @@ func FetchAllCityNames() ([]string, error) {
 	}
 
 	return cityNames, nil
-}
+})
