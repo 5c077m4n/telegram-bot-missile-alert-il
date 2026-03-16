@@ -96,7 +96,6 @@ func Poll(ctx context.Context, b *bot.Bot, s *store.Store) {
 		case <-ticker.C:
 			alerts, err := fetchAlerts()
 			if err != nil {
-				slog.Error("Could not fetch historical alerts", "error", err)
 				continue
 			}
 

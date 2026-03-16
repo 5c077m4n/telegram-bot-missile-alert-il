@@ -1,5 +1,7 @@
 package alerts
 
+import "sync"
+
 var AlertTypeNames = map[int]string{
 	1:  "missiles",
 	2:  "radiologicalEvent",
@@ -19,7 +21,7 @@ var AlertTypeNames = map[int]string{
 	99: "unknown",
 }
 
-type WarningAlert struct {
+type Alert struct {
 	ID          int64    `json:"id,string"`
 	Category    int      `json:"cat,string"`
 	Title       string   `json:"title"`
@@ -27,9 +29,25 @@ type WarningAlert struct {
 	Description string   `json:"desc"`
 }
 
-func (wa *WarningAlert) CategoryName() string {
+func (wa *Alert) CategoryName() string {
 	if name, found := AlertTypeNames[wa.Category]; found {
 		return name
 	}
 	return "genric"
+}
+
+var (
+	lastAlertID  int64
+	lastAlertMtx sync.Mutex
+)
+
+func (a *Alert) ShouldSend() bool {
+	lastAlertMtx.Lock()
+	defer lastAlertMtx.Unlock()
+
+	if a.ID < lastAlertID {
+		lastAlertID = a.ID
+		return true
+	}
+	return false
 }

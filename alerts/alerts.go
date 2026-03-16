@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"telegram-bot-missile-alert-il/cities"
@@ -17,23 +16,7 @@ import (
 	"github.com/go-telegram/bot"
 )
 
-var (
-	lastAlertID  int64
-	lastAlertMtx sync.Mutex
-)
-
-func isDuplicateAlert(id int64) bool {
-	lastAlertMtx.Lock()
-	defer lastAlertMtx.Unlock()
-
-	if id == lastAlertID {
-		return true
-	}
-	lastAlertID = id
-	return false
-}
-
-func formatAlertMessage(alert *WarningAlert) string {
+func formatAlertMessage(alert *Alert) string {
 	messageParts := []string{
 		"🚨 ALERT: " + alert.Title + " 🚨",
 		"Cities: " + strings.Join(alert.Cities, ", "),
@@ -41,7 +24,7 @@ func formatAlertMessage(alert *WarningAlert) string {
 	return strings.Join(messageParts, "\n\n")
 }
 
-func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, alert *WarningAlert) error {
+func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, alert *Alert) error {
 	allUsers, err := s.GetAllUsers(ctx)
 	if err != nil {
 		slog.Error("Could not get all users", "error", err)
@@ -71,7 +54,7 @@ func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, alert *Warning
 	return nil
 }
 
-func fetchAlert() (*WarningAlert, error) {
+func fetchAlert() (*Alert, error) {
 	req, err := http.NewRequest(
 		"GET",
 		"https://www.oref.org.il/WarningMessages/alert/alerts.json",
@@ -105,7 +88,7 @@ func fetchAlert() (*WarningAlert, error) {
 		return nil, fmt.Errorf("unexpected status code from Pikud HaOref API %d", resp.StatusCode)
 	}
 
-	var alert *WarningAlert
+	var alert *Alert
 	if err := json.NewDecoder(resp.Body).Decode(alert); err != nil {
 		return nil, err
 	}
@@ -124,11 +107,12 @@ func Poll(ctx context.Context, b *bot.Bot, s *store.Store) {
 		case <-ticker.C:
 			alert, err := fetchAlert()
 			if err != nil {
+				slog.Error("Could not fetch alert", "error", err)
 				continue
 			}
 
 			slog.Debug("Recieved alert", "value", alert)
-			if !isDuplicateAlert(alert.ID) {
+			if alert.ShouldSend() {
 				if err := notifyUsers(ctx, b, s, alert); err != nil {
 					slog.Error(
 						"could not notify user",
