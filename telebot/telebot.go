@@ -36,6 +36,14 @@ func Setup(ctx context.Context, s *store.Store) error {
 			handleCityChange(ctx, bot, update, s)
 		},
 	)
+	b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/where",
+		bot.MatchTypeExact,
+		func(ctx context.Context, bot *bot.Bot, update *models.Update) {
+			handleWhere(ctx, bot, update, s)
+		},
+	)
 
 	go alerts.Poll(ctx, b, s)
 	go history.Poll(ctx, b, s)

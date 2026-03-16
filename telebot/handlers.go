@@ -97,3 +97,38 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 		slog.Error("Error sending city update message", "chat ID", chatID, "error", err)
 	}
 }
+
+func handleWhere(ctx context.Context, b *bot.Bot, update *models.Update, s *store.Store) {
+	if update.Message == nil {
+		return
+	}
+
+	chatID := update.Message.Chat.ID
+	user, err := s.GetUser(chatID)
+	if err != nil {
+		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "My bad, couldn't get your user",
+		})
+		slog.Error("Could not get user", "chatID", chatID, "error", err)
+		return
+	}
+
+	if user.City != "" {
+		_, errSendMessage := b.SendMessage(
+			ctx,
+			&bot.SendMessageParams{ChatID: chatID, Text: "You live in " + user.City},
+		)
+		if errSendMessage != nil {
+			slog.Error("Error sending current city", "chat ID", chatID, "error", err)
+		}
+	} else {
+		_, errSendMessage := b.SendMessage(
+			ctx,
+			&bot.SendMessageParams{ChatID: chatID, Text: "Don't know 🤷"},
+		)
+		if errSendMessage != nil {
+			slog.Error("Error sending empty empty city message", "chat ID", chatID, "error", err)
+		}
+	}
+}
