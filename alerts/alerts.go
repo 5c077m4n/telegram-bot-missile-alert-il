@@ -109,7 +109,6 @@ func fetchAlert() (*WarningAlert, error) {
 	if err := json.NewDecoder(resp.Body).Decode(alert); err != nil {
 		return nil, err
 	}
-	slog.Info("Got an alert", "value", alert)
 
 	return alert, nil
 }
@@ -128,10 +127,7 @@ func Poll(ctx context.Context, b *bot.Bot, s *store.Store) {
 				continue
 			}
 
-			slog.Info(
-				"Recieved alert",
-				"value", alert,
-			)
+			slog.Debug("Recieved alert", "value", alert)
 			if !isDuplicateAlert(alert.ID) {
 				if err := notifyUsers(ctx, b, s, alert); err != nil {
 					slog.Error(

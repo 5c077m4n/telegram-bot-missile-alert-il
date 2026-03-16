@@ -55,7 +55,6 @@ func fetchHistory() ([]*HistoryItem, error) {
 func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, items []*HistoryItem) error {
 	allUsers, err := s.GetAllUsers(ctx)
 	if err != nil {
-		slog.Error("Could not get all users", "error", err)
 		return err
 	}
 
@@ -100,7 +99,7 @@ func Poll(ctx context.Context, b *bot.Bot, s *store.Store) {
 				continue
 			}
 
-			slog.Info("Recieved historical items", "count", len(items))
+			slog.Debug("Recieved historical items", "count", len(items))
 			if err := notifyUsers(ctx, b, s, items); err != nil {
 				slog.Error("could not notify user", "error", err, "alerts", items)
 			}

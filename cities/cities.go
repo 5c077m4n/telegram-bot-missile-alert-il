@@ -56,7 +56,7 @@ var FetchAllCityNamesOnce = sync.OnceValues(func() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	slog.Info("Fetched all cities", "count", len(allCities))
+	slog.Debug("Fetched all cities", "count", len(allCities))
 
 	cityNames := make([]string, len(allCities))
 	for _, city := range allCities {

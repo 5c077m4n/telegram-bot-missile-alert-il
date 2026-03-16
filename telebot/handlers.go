@@ -33,7 +33,7 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 	chatID := update.Message.Chat.ID
 	newCity := strings.TrimLeft(update.Message.Text, "/city ")
 	newCity = strings.Trim(newCity, " ")
-	slog.Info("Recieved message", "chat ID", chatID, "new city", newCity)
+	slog.Debug("Recieved message", "chat ID", chatID, "new city", newCity)
 
 	if newCity == "" {
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -50,8 +50,6 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 	if err != nil {
 		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
 	} else {
-		slog.Info("Got all cities", "count", len(availableCities))
-
 		if !slices.Contains(availableCities, newCity) {
 			msg := strings.Builder{}
 			msg.WriteString(newCity + "\nis a stupid city, please choose a better one")
@@ -87,7 +85,7 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 		slog.Error("Couldn't update user's city", "chatID", chatID)
 		return
 	}
-	slog.Info("Updated user info", "user", user)
+	slog.Debug("Updated user info", "user", user)
 
 	_, err = b.SendMessage(
 		ctx,
