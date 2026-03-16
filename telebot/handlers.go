@@ -46,6 +46,29 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 		return
 	}
 
+	user, err := s.GetOrCreateUser(chatID)
+	if err != nil {
+		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "My bad, couldn't get your user",
+		})
+		slog.Error("Could not get user", "chatID", chatID, "error", err)
+		return
+	}
+
+	if user.City == newCity {
+		msg := "You're already here..."
+		if _, err := b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: msg}); err != nil {
+			slog.Error(
+				"Error sending already here message",
+				"chat ID", chatID,
+				"error", err,
+				"message", msg,
+			)
+		}
+		return
+	}
+
 	if availableCities, err := cities.FetchAllCityNamesOnce(); err != nil {
 		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
 	} else {
@@ -64,16 +87,6 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 			}
 			return
 		}
-	}
-
-	user, err := s.GetOrCreateUser(chatID)
-	if err != nil {
-		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: chatID,
-			Text:   "My bad, couldn't get your user",
-		})
-		slog.Error("Could not get user", "chatID", chatID, "error", err)
-		return
 	}
 
 	user, err = s.UpdateUserCity(user.ChatID, newCity)
