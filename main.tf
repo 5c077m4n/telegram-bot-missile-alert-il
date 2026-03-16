@@ -119,12 +119,15 @@ resource "google_compute_instance" "vm_instance" {
     git clone https://github.com/5c077m4n/telegram-bot-missile-alert-il.git
     cd telegram-bot-missile-alert-il/
 
+    curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | sudo -E bash
+    sudo apt install task
+
     echo "ENV=prod" >>.env
     echo "TELEGRAM_BOT_API_TOKEN=$(gcloud secrets versions access latest --secret="TELEGRAM_BOT_API_TOKEN")" >>.env
     echo "MONGO_URI=$(gcloud secrets versions access latest --secret="MONGO_URI")" >>.env
     echo "MONGO_DB=$(gcloud secrets versions access latest --secret="MONGO_DB")" >>.env
 
-    sudo docker compose --profile prod up -d --build
+    task compose
   EOT
 }
 
