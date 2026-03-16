@@ -13,7 +13,7 @@ import (
 	"github.com/go-telegram/bot"
 )
 
-func fetchHistory() ([]*HistoryItem, error) {
+func fetchAlerts() ([]*Alert, error) {
 	req, err := http.NewRequest(
 		"GET",
 		"https://www.oref.org.il/WarningMessages/alert/History/AlertsHistory.json",
@@ -39,20 +39,20 @@ func fetchHistory() ([]*HistoryItem, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(
-			"unexpected status code from Pikud HaOref History API %d",
+			"unexpected status code from Pikud HaOref History API: %d",
 			resp.StatusCode,
 		)
 	}
 
-	var history []*HistoryItem
-	if err := json.NewDecoder(resp.Body).Decode(&history); err != nil {
+	var alerts []*Alert
+	if err := json.NewDecoder(resp.Body).Decode(&alerts); err != nil {
 		return nil, err
 	}
 
-	return history, nil
+	return alerts, nil
 }
 
-func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, items []*HistoryItem) error {
+func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, alerts []*Alert) error {
 	allUsers, err := s.GetAllUsers(ctx)
 	if err != nil {
 		return err
@@ -64,13 +64,13 @@ func notifyUsers(ctx context.Context, b *bot.Bot, s *store.Store, items []*Histo
 			continue
 		}
 
-		for _, item := range items {
-			if item.City == user.City {
-				slog.Info("Found a match", "user", user, "history item", item)
+		for _, alert := range alerts {
+			if alert.ShouldSend(user.City) {
+				slog.Debug("Found a match", "user", user, "history item", alert)
 
 				_, err := b.SendMessage(
 					ctx,
-					&bot.SendMessageParams{ChatID: user.ChatID, Text: item.Title},
+					&bot.SendMessageParams{ChatID: user.ChatID, Text: alert.Title},
 				)
 				if err != nil {
 					errs = append(errs, err)
@@ -94,14 +94,15 @@ func Poll(ctx context.Context, b *bot.Bot, s *store.Store) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			items, err := fetchHistory()
+			alerts, err := fetchAlerts()
 			if err != nil {
+				slog.Error("Could not fetch historical alerts", "error", err)
 				continue
 			}
 
-			slog.Debug("Recieved historical items", "count", len(items))
-			if err := notifyUsers(ctx, b, s, items); err != nil {
-				slog.Error("could not notify user", "error", err, "alerts", items)
+			slog.Debug("Recieved historical alerts", "count", len(alerts))
+			if err := notifyUsers(ctx, b, s, alerts); err != nil {
+				slog.Error("could not notify user", "error", err, "alerts", alerts)
 			}
 
 		}
