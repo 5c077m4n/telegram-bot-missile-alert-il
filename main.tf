@@ -105,6 +105,7 @@ resource "google_compute_instance" "vm_instance" {
 
     sudo apt update
     sudo apt install --yes git neovim curl ufw fail2ban ca-certificates curl gnupg tar
+    sudo ufw default deny incoming
     sudo ufw allow OpenSSH
     sudo ufw --force enable
     sudo systemctl enable fail2ban --now
