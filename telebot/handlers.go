@@ -79,7 +79,9 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 
 			if similars := fuzzy.Find(newCity, availableCities); len(similars) > 0 {
 				msg.WriteString("\nMaybe you meant:\n")
-				msg.WriteString(strings.Join(similars, "\n"))
+				for _, s := range similars {
+					msg.WriteString("- " + s + "\n")
+				}
 			}
 
 			if _, err := b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: msg.String()}); err != nil {
