@@ -5,14 +5,29 @@ import (
 	"log/slog"
 	"slices"
 	"strings"
+	"sync"
 
-	"telegram-bot-missile-alert-il/cities"
 	"telegram-bot-missile-alert-il/store"
 
+	"github.com/5c077m4n/pikud-haoref-api-go/cities"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
+
+var fetchAllCityNamesOnce = sync.OnceValues(func() ([]string, error) {
+	allCities, err := cities.FetchCities()
+	if err != nil {
+		return nil, err
+	}
+
+	cityNames := make([]string, 0, len(allCities))
+	for _, c := range allCities {
+		cityNames = append(cityNames, c.Label)
+	}
+
+	return cityNames, nil
+})
 
 func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -69,7 +84,7 @@ func handleCityChange(ctx context.Context, b *bot.Bot, update *models.Update, s 
 		return
 	}
 
-	if availableCities, err := cities.FetchAllCityNamesOnce(); err != nil {
+	if availableCities, err := fetchAllCityNamesOnce(); err != nil {
 		slog.Error("Could not fetch city list", "chat ID", chatID, "error", err)
 	} else {
 		if !slices.Contains(availableCities, newCity) {

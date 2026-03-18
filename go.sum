@@ -1,3 +1,11 @@
+github.com/5c077m4n/pikud-haoref-api-go v0.1.0 h1:CV5zsq/xrKCnKkrAb1h6tNQWY4XX40NpzOI4XhBvjm0=
+github.com/5c077m4n/pikud-haoref-api-go v0.1.0/go.mod h1:gajFJqh9Nh6mnWd+f2BvuinDMSW9KIP7LrIf5xeK4Fc=
+github.com/5c077m4n/pikud-haoref-api-go/alerts v0.0.0-20260318173537-cb2922a376ac h1:8nokgOoxynGa0jwHfwRrW/sRZ32EgRFQ6zAhv2Edun4=
+github.com/5c077m4n/pikud-haoref-api-go/alerts v0.0.0-20260318173537-cb2922a376ac/go.mod h1:XC6rrCzuskZTyGgoEaFkZPveK7nf3QZi+SJncqLi63U=
+github.com/5c077m4n/pikud-haoref-api-go/cities v0.0.0-20260318173537-cb2922a376ac h1:D2O26J08hhbQQoALqb/b4SJJAfbB5N6aBG0syjJGXhs=
+github.com/5c077m4n/pikud-haoref-api-go/cities v0.0.0-20260318173537-cb2922a376ac/go.mod h1:CLi1kuM8iqrI5XFnzihVSDmJlsw4S+o11laxyLdalTI=
+github.com/5c077m4n/pikud-haoref-api-go/history v0.0.0-20260318173537-cb2922a376ac h1:pQ6P9cQA1OlmYKx4YuIdlxhG4cwnCHezqoFg5CgWBsY=
+github.com/5c077m4n/pikud-haoref-api-go/history v0.0.0-20260318173537-cb2922a376ac/go.mod h1:CpK6MeThuKE6RoNzNASXkLIRp22BaS6l8vsOQfOmKXY=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-telegram/bot v1.19.0 h1:tuvTQhgNietHFRN0HUDhuXsgfgkGSaO8WWwZQW3DMQg=

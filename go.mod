@@ -3,6 +3,9 @@ module telegram-bot-missile-alert-il
 go 1.26.1
 
 require (
+	github.com/5c077m4n/pikud-haoref-api-go/alerts v0.0.0-20260318173537-cb2922a376ac
+	github.com/5c077m4n/pikud-haoref-api-go/cities v0.0.0-20260318173537-cb2922a376ac
+	github.com/5c077m4n/pikud-haoref-api-go/history v0.0.0-20260318173537-cb2922a376ac
 	github.com/go-telegram/bot v1.19.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lithammer/fuzzysearch v1.1.8
@@ -10,6 +13,7 @@ require (
 )
 
 require (
+	github.com/5c077m4n/pikud-haoref-api-go v0.1.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect

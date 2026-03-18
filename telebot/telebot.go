@@ -4,12 +4,13 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"slices"
 	"strings"
 
-	"telegram-bot-missile-alert-il/alerts"
-	"telegram-bot-missile-alert-il/cities"
-	"telegram-bot-missile-alert-il/history"
 	"telegram-bot-missile-alert-il/store"
+
+	"github.com/5c077m4n/pikud-haoref-api-go/alerts"
+	"github.com/5c077m4n/pikud-haoref-api-go/history"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -39,7 +40,7 @@ func notifyAlertUsers(ctx context.Context, b *bot.Bot, s *store.Store, alert *al
 			continue
 		}
 
-		if cities.ContainsCityArray(alert.Cities, user.City) {
+		if slices.Contains(alert.Cities, user.City) {
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: user.ChatID,
 				Text:   formatAlertMessage(alert),
