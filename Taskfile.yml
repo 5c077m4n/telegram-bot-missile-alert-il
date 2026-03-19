@@ -39,11 +39,13 @@ tasks:
     cmds:
       - tofu apply
   ssh:
+    vars:
+      NAME:
+        sh: tofu show -json | jq --raw-output '.values.root_module.resources[] | select(.name == "vm_instance") | .values.name'
+      ZONE:
+        sh: tofu show -json | jq --raw-output '.values.root_module.resources[] | select(.name == "vm_instance") | .values.zone'
     cmds:
-      - export VM_VALUES="$(tofu show -json | jq --raw-output '.values.root_module.resources[] | select(.name == "vm_instance") | .values')"
-        export NAME="$(echo "$VM_VALUES" | jq --raw-output '.name')" &&
-        export ZONE="$(echo "$VM_VALUES" | jq --raw-output '.zone')" &&
-        gcloud compute ssh --zone "$ZONE" "$NAME" --project $PROJECT_ID {{.EXTRA_ARGS}}
+      - gcloud compute ssh --zone {{.ZONE}} --project {{.PROJECT_ID}} {{.EXTRA_ARGS}} {{.NAME}}
   ssh:deploy:
     cmds:
       - task: ssh
