@@ -12,6 +12,7 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+    restart: always
 
   mongodb:
     image: mongo:latest
@@ -24,7 +25,7 @@ services:
       interval: 3s
       timeout: 5s
       retries: 3
-    restart: unless-stopped
+    restart: always
 
 volumes:
   mongo_data: {}
