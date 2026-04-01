@@ -5,4 +5,4 @@ go fix ./... || exit 1
 go vet ./... || exit 1
 go build -o main . || exit 1
 
-gitleaks git --verbose
+gitleaks git --verbose --config=./.gitleaks.toml
