@@ -104,6 +104,12 @@ func Setup(ctx context.Context, s *store.Store) error {
 	if err != nil {
 		return err
 	}
+	if _, err := b.SetMyCommands(ctx, &bot.SetMyCommandsParams{Commands: []models.BotCommand{
+		{Command: "/where", Description: "Where are you listed"},
+		{Command: "/city", Description: "Select your current city"},
+	}}); err != nil {
+		return err
+	}
 	b.RegisterHandler(
 		bot.HandlerTypeMessageText,
 		"/start",
